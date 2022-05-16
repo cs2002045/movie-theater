@@ -18,7 +18,11 @@ public class ReservationTests {
                 1,
                 LocalDateTime.now()
         );
-        assertTrue(new Reservation(customer, showing, 3).totalFee() == 37.5);
+
+        int audienceCount = 3;
+        double discount = 3.0;
+        double expected = (showing.getMovie().getTicketPrice() - discount) * audienceCount;
+        assertTrue(expected == new Reservation(customer, showing, 3).totalFee());
     }
 
     @Test

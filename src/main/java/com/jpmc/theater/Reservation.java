@@ -12,7 +12,7 @@ public class Reservation {
     }
 
     public double totalFee() {
-        return showing.getMovieFee() * audienceCount;
+        return showing.getMovie().calculateTicketPrice(showing) * audienceCount;
     }
 
     @Override

@@ -24,9 +24,9 @@ public class Showing {
         return showStartTime;
     }
 
-    public double getMovieFee() {
-        return movie.getTicketPrice();
-    }
+    // public double getMovieFee() {
+    //     return movie.getTicketPrice();
+    // }
 
     public int getSequenceOfTheDay() {
         return sequenceOfTheDay;
@@ -35,7 +35,7 @@ public class Showing {
     @Override
     public String toString() {
         return this.getSequenceOfTheDay() + ": " + this.getStartTime() + " " + this.getMovie().getTitle() + " " 
-            + CommonUtil.humanReadableFormat(this.getMovie().getRunningTime()) + " $" + this.getMovieFee();
+            + CommonUtil.humanReadableFormat(this.getMovie().getRunningTime()) + " $" + this.getMovie().getTicketPrice();
     }
 
     public String toJson() {
