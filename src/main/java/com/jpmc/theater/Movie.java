@@ -1,10 +1,39 @@
 package com.jpmc.theater;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Movie {
-    private static int MOVIE_CODE_SPECIAL = 1;
+
+    private static final int MOVIE_CODE_SPECIAL = 1;
+    private static final double MOVIE_SPECIAL_DISCOUNT_PERCENTAGE = 0.2d;
+    private static final double MOVIE_ELEVEN_TO_FOUR_DISCOUNT_PERCENTAGE = 0.25d;
+    private static final double MOVIE_FIRST_SHOW_DISCOUNT_AMOUNT = 3;
+    private static final double MOVIE_SECOND_SHOW_DISCOUNT_AMOUNT = 2;
+    private static final double MOVIE_SEVENTH_SHOW_DISCOUNT_AMOUNT = 1;
+
+    private static final int FIRST_SHOW = 1;
+    private static final int SECOND_SHOW = 2;
+    private static final int SEVENTH_SHOW = 7;
+
+    private static final Map<Integer, Double> SPECIAL_DISCOUNTS;  
+    static {
+        SPECIAL_DISCOUNTS = new HashMap<>();
+        SPECIAL_DISCOUNTS.put(MOVIE_CODE_SPECIAL, MOVIE_SPECIAL_DISCOUNT_PERCENTAGE);
+    }
+
+    private static final Map<Integer, Double> SHOW_SEQUENCE_DISCOUNTS;
+    static {
+        SHOW_SEQUENCE_DISCOUNTS = new HashMap<>();
+        SHOW_SEQUENCE_DISCOUNTS.put(FIRST_SHOW, MOVIE_FIRST_SHOW_DISCOUNT_AMOUNT);
+        SHOW_SEQUENCE_DISCOUNTS.put(SECOND_SHOW, MOVIE_SECOND_SHOW_DISCOUNT_AMOUNT);
+        SHOW_SEQUENCE_DISCOUNTS.put(SEVENTH_SHOW, MOVIE_SEVENTH_SHOW_DISCOUNT_AMOUNT);
+    }
 
     private String title;
     private String description;
@@ -32,28 +61,40 @@ public class Movie {
     }
 
     public double calculateTicketPrice(Showing showing) {
-        return ticketPrice - getDiscount(showing.getSequenceOfTheDay());
+        return ticketPrice - getDiscount(showing);
     }
 
-    private double getDiscount(int showSequence) {
+    private double getDiscount(Showing showing) {
         double specialDiscount = 0;
-        if (MOVIE_CODE_SPECIAL == specialCode) {
-            specialDiscount = ticketPrice * 0.2;  // 20% discount for special movie
+        if (SPECIAL_DISCOUNTS.keySet().contains(specialCode)) {
+            specialDiscount = ticketPrice * SPECIAL_DISCOUNTS.get(specialCode);
         }
 
         double sequenceDiscount = 0;
-        if (showSequence == 1) {
-            sequenceDiscount = 3; // $3 discount for 1st show
-        } else if (showSequence == 2) {
-
-            sequenceDiscount = 2; // $2 discount for 2nd show
+        if (SHOW_SEQUENCE_DISCOUNTS.containsKey(showing.getSequenceOfTheDay())) {
+            sequenceDiscount = SHOW_SEQUENCE_DISCOUNTS.get(showing.getSequenceOfTheDay());
         }
-//        else {
-//            throw new IllegalArgumentException("failed exception");
-//        }
 
-        // biggest discount wins
-        return specialDiscount > sequenceDiscount ? specialDiscount : sequenceDiscount;
+        double showTimeDiscount = getTimeDiscount(showing);
+
+        return biggestDiscount(specialDiscount, sequenceDiscount, showTimeDiscount);
+    }
+
+    private double getTimeDiscount(Showing showing) {
+        
+        LocalDateTime from = LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0));
+        LocalDateTime to = LocalDateTime.of(LocalDate.now(), LocalTime.of(16, 0));
+        Duration discountWindow = Duration.between(from, to);
+        Duration hoursFromEleven = Duration.between(from, showing.getStartTime());
+        if (hoursFromEleven.toHours() >= 0 && hoursFromEleven.toHours() <= discountWindow.toHours()) {
+            return ticketPrice * MOVIE_ELEVEN_TO_FOUR_DISCOUNT_PERCENTAGE;
+        }
+
+        return 0;
+    }
+
+    private double biggestDiscount(double specialDiscount, double sequenceDiscount, double showTimeDiscount) {
+        return Math.max(Math.max(specialDiscount, sequenceDiscount), showTimeDiscount);
     }
 
     @Override

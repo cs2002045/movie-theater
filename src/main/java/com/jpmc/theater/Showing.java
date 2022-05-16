@@ -2,6 +2,9 @@ package com.jpmc.theater;
 
 import java.time.LocalDateTime;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class Showing {
     private Movie movie;
     private int sequenceOfTheDay;
@@ -21,10 +24,6 @@ public class Showing {
         return showStartTime;
     }
 
-    public boolean isSequence(int sequence) {
-        return this.sequenceOfTheDay == sequence;
-    }
-
     public double getMovieFee() {
         return movie.getTicketPrice();
     }
@@ -33,7 +32,15 @@ public class Showing {
         return sequenceOfTheDay;
     }
 
-    private double calculateFee(int audienceCount) {
-        return movie.calculateTicketPrice(this) * audienceCount;
+    @Override
+    public String toString() {
+        return this.getSequenceOfTheDay() + ": " + this.getStartTime() + " " + this.getMovie().getTitle() + " " 
+            + CommonUtil.humanReadableFormat(this.getMovie().getRunningTime()) + " $" + this.getMovieFee();
     }
+
+    public String toJson() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+    
 }

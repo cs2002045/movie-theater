@@ -14,4 +14,10 @@ public class Reservation {
     public double totalFee() {
         return showing.getMovieFee() * audienceCount;
     }
+
+    @Override
+    public String toString() {
+        return "Reservation by: " + this.customer.getName() + ", Showing: " + showing.getMovie().getTitle() 
+            + ", # of Tickets: " + this.audienceCount;
+    }
 }
